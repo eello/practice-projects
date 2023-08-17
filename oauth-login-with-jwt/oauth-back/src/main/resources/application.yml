@@ -1,0 +1,6 @@
+oauth:
+  kakao:
+    client-id: {kakao-client-id}
+  naver:
+    client-id: {naver-client-id}
+    client-secret: {naver-client-secret}
