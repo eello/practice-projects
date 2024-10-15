@@ -22,7 +22,7 @@ public class SimpleDIContainer {
 
 		AController aController = context.getBean("aController", AController.class);
 		AService aService = context.getBean("aService", AService.class);
-		BService bService = context.getBean("bService", BService.class);
+		// BService bService = context.getBean("bService", BService.class);
 		ARepository aRepository = context.getBean("aRepository", ARepository.class);
 		BRepository bRepository = context.getBean("bRepository", BRepository.class);
 
@@ -34,6 +34,6 @@ public class SimpleDIContainer {
 
 		System.out.println("aController.getService() == aService ? " + (aController.getService() == aService));
 		System.out.println("aService.getRepository() == aRepository ? " + (aService.getRepository() == aRepository));
-		System.out.println("bService.getRepository() == bRepository ? " + (bService.getRepository() == bRepository));
+		// System.out.println("bService.getRepository() == bRepository ? " + (bService.getRepository() == bRepository));
 	}
 }

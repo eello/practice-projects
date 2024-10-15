@@ -53,7 +53,6 @@ public class DefaultBeanFactory implements BeanFactory {
 		for (int i = 0; i < def.getDependsOn().length; i++) {
 			List<Object> beans = beanByType.get(dependsOn[i]);
 			if (beans == null || beans.isEmpty()) {
-				System.out.println("beans = " + beans);
 				throw new IllegalStateException(
 					"[" + def.getBeanName() + "]을 생성하기 위해 주입해야할 빈 [" + dependsOn[i].getName() + "]이 생성되지 않음.");
 			}

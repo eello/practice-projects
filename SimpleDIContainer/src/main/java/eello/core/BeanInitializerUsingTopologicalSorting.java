@@ -36,7 +36,6 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 		for (Map.Entry<Class<?>, Integer> entry : indegree.entrySet()) {
 			if (entry.getValue() == 0) {
 				queue.add(entry.getKey());
-				// indegree.remove(entry.getKey());
 			}
 		}
 
@@ -44,12 +43,6 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 		while (!queue.isEmpty()) {
 			Class<?> target = queue.poll();
 			List<BeanDefinition> defs = beanDefinitionMap.get(target);
-
-			if (defs.size() > 1) {
-				// target이 인터페이스이고 target 인터페이스를 구현하는 빈이 여러개 등록될 경우
-				// target 인터페이스에 어떤 구현체를 알 수 없음. 전체적으로 보면 결국 어떤 빈이 주입되어야 할 지 모호해짐.
-				throw new IllegalStateException("모호함");
-			}
 
 			BeanDefinition bd = defs.getFirst();
 			if (beanFactory.isRegistered(bd)) {
@@ -81,24 +74,13 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 		for (BeanDefinition bd : bds) {
 			putWithInitializeIfNotContainsKey(beanDefinitionMap, bd.getBeanType(), bd);
-			for (Class<?> interfaceType : bd.getInterfaceTypes()) {
-				putWithInitializeIfNotContainsKey(beanDefinitionMap, interfaceType, bd);
-			}
 
 			putWithInitializeIfNotContainsKey(dependsOnMe, bd.getBeanType(), null);
 			for (Class<?> dependency : bd.getDependsOn()) {
 				putWithInitializeIfNotContainsKey(dependsOnMe, dependency, bd.getBeanType());
 			}
-		}
 
-		for (Map.Entry<Class<?>, List<Class<?>>> entry : dependsOnMe.entrySet()) {
-			if (!indegree.containsKey(entry.getKey())) {
-				indegree.put(entry.getKey(), 0);
-			}
-
-			for (Class<?> val : entry.getValue()) {
-				indegree.put(val, indegree.getOrDefault(val, 0) + 1);
-			}
+			indegree.put(bd.getBeanType(), bd.getDependsOn().length);
 		}
 	}
 

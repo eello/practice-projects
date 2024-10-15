@@ -7,17 +7,17 @@ import main.java.eello.core.Component;
 @Component
 public class AService implements Service {
 
-	private final Service service;
+	// private final Service service;
 	private final Repository repository;
 
-	// public AService(ARepository repository) {
-	// 	this.repository = repository;
-	// }
-
-	public AService(BService service, Repository repository) {
-		this.service = service;
+	public AService(ARepository repository) {
 		this.repository = repository;
 	}
+
+	// public AService(BService service, Repository repository) {
+	// 	this.service = service;
+	// 	this.repository = repository;
+	// }
 
 	@Override
 	public void func() {

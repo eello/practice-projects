@@ -1,6 +1,5 @@
 package main.java.eello.container.contoller;
 
-import main.java.eello.container.service.AService;
 import main.java.eello.container.service.Service;
 import main.java.eello.core.Component;
 
@@ -9,7 +8,7 @@ public class AController {
 
 	private final Service service;
 
-	public AController(AService service) {
+	public AController(Service service) {
 		this.service = service;
 	}
 
