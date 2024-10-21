@@ -57,12 +57,28 @@ public class DefaultBeanFactory implements BeanFactory {
 					"[" + def.getBeanName() + "]을 생성하기 위해 주입해야할 빈 [" + dependsOn[i].getName() + "]이 생성되지 않음.");
 			}
 
-			if (beans.size() > 1) {
-				throw new IllegalStateException(
-					"[" + def.getBeanName() + "]에 주입해야할 빈 [" + dependsOn[i].getName() + "]이 모호함.");
-			}
+//			if (beans.size() > 1) {
+//				throw new IllegalStateException(
+//					"[" + def.getBeanName() + "]에 주입해야할 빈 [" + dependsOn[i].getName() + "]이 모호함.");
+//			}
 
 			constructorParams[i] = beans.getFirst();
+			if (beans.size() > 1) {
+				List<Object> candidate = new ArrayList<>();
+				for (Object candi : beans) {
+					if (candi.getClass().isAnnotationPresent(Primary.class)) {
+						candidate.add(candi);
+					}
+				}
+
+				if (candidate.size() != 1) {
+					throw new NoUniqueBeanDefinitionException(
+							"[" + def.getBeanName() + "]에 주입해야할 빈 [" + dependsOn[i].getName() + "]이 모호함."
+					);
+				}
+
+				constructorParams[i] = candidate.getFirst();
+			}
 		}
 
 		return def.newInstance(constructorParams);

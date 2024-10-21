@@ -2,7 +2,7 @@ package main.java.eello.container.repository;
 
 import main.java.eello.core.Component;
 
-@Component
+// @Component
 public class BRepository implements Repository {
 
 	@Override

@@ -1,23 +1,18 @@
 package main.java.eello.container.service;
 
-import main.java.eello.container.repository.ARepository;
 import main.java.eello.container.repository.Repository;
 import main.java.eello.core.Component;
+import main.java.eello.core.Primary;
 
+@Primary
 @Component
 public class AService implements Service {
 
-	// private final Service service;
 	private final Repository repository;
 
-	public AService(ARepository repository) {
+	public AService(Repository repository) {
 		this.repository = repository;
 	}
-
-	// public AService(BService service, Repository repository) {
-	// 	this.service = service;
-	// 	this.repository = repository;
-	// }
 
 	@Override
 	public void func() {

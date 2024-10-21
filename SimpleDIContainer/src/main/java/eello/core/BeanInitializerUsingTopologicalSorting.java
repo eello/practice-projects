@@ -31,6 +31,7 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 		IllegalAccessException, ClassNotFoundException {
 		Set<BeanDefinition> bds = bdScanner.doScan(basePackage);
 		init(bds);
+		checkValidation();
 
 		Queue<Class<?>> queue = new ArrayDeque<>();
 		for (Map.Entry<Class<?>, Integer> entry : indegree.entrySet()) {
@@ -61,7 +62,7 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 			created++;
 		}
-		
+
 		if (created != bds.size()) {
 			throw new IllegalStateException("순환참조오류 발생 가능성 있음.");
 		}
@@ -74,6 +75,9 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 		for (BeanDefinition bd : bds) {
 			putWithInitializeIfNotContainsKey(beanDefinitionMap, bd.getBeanType(), bd);
+			for (Class<?> interfaceType : bd.getInterfaceTypes()) {
+				putWithInitializeIfNotContainsKey(beanDefinitionMap, interfaceType, bd);
+			}
 
 			putWithInitializeIfNotContainsKey(dependsOnMe, bd.getBeanType(), null);
 			for (Class<?> dependency : bd.getDependsOn()) {
@@ -81,6 +85,36 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 			}
 
 			indegree.put(bd.getBeanType(), bd.getDependsOn().length);
+		}
+	}
+
+	private void checkValidation() {
+		for (Map.Entry<Class<?>, List<BeanDefinition>> entry : beanDefinitionMap.entrySet()) {
+			if (dependsOnMe.containsKey(entry.getKey())
+					&& !dependsOnMe.get(entry.getKey()).isEmpty() // entry.getKey()에 의존하는 클래스가 존재할 때
+					&& entry.getValue().size() > 1 // 후보 빈이 2개 이상일 경우
+			) {
+				int count = 0; // @Primary 가 적용된 클래스 수
+				for (BeanDefinition bd : entry.getValue()) {
+					if (bd.getBeanType().isAnnotationPresent(Primary.class)) {
+						count++;
+
+						if (count > 1) {
+							break;
+						}
+					}
+				}
+
+				if (count != 1) {
+					String message = "[" + dependsOnMe.get(entry.getKey()).getFirst().getName() +
+							"]의 파라미터 [" + entry.getKey().getName() + "] 타입";
+					message += count == 0 ?
+							"의 후보 빈이 2개 이상입니다."
+							: "에 @Primary가 적용된 클래스가 2개 이상입니다.";
+
+					throw new NoUniqueBeanDefinitionException(message);
+				}
+			}
 		}
 	}
 
@@ -96,9 +130,15 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 	private Class<?>[] getNextClasses(BeanDefinition bd) {
 		Set<Class<?>> next = new HashSet<>(dependsOnMe.get(bd.getBeanType()));
+
+		boolean isPrimary = bd.getBeanType().isAnnotationPresent(Primary.class);
 		for (Class<?> interfaceType : bd.getInterfaceTypes()) {
-			if (dependsOnMe.containsKey(interfaceType)) {
-				next.addAll(dependsOnMe.get(interfaceType));
+			if (isPrimary
+					|| (beanDefinitionMap.containsKey(interfaceType) && beanDefinitionMap.get(interfaceType).size() == 1)
+			) {
+				if (dependsOnMe.containsKey(interfaceType)) {
+					next.addAll(dependsOnMe.get(interfaceType));
+				}
 			}
 		}
 		return next.toArray(new Class<?>[0]);
