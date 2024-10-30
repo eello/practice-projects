@@ -1,7 +1,6 @@
-package main.java.eello.core;
+package main.java.eello.container.core;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Set;
 
 public interface BeanInitializer {
 

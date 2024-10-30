@@ -1,4 +1,4 @@
-package main.java.eello.core;
+package main.java.eello.container.core;
 
 import java.lang.reflect.InvocationTargetException;
 

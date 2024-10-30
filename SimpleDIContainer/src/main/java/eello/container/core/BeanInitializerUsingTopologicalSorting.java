@@ -1,4 +1,7 @@
-package main.java.eello.core;
+package main.java.eello.container.core;
+
+import main.java.eello.container.ClassPathBeanDefinitionScanner;
+import main.java.eello.container.exception.NoUniqueBeanDefinitionException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
@@ -31,7 +34,7 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 		IllegalAccessException, ClassNotFoundException {
 		Set<BeanDefinition> bds = bdScanner.doScan(basePackage);
 		init(bds);
-		checkValidation();
+		checkPrimaryValidation();
 
 		Queue<Class<?>> queue = new ArrayDeque<>();
 		for (Map.Entry<Class<?>, Integer> entry : indegree.entrySet()) {
@@ -52,8 +55,11 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 			beanFactory.registerBean(bd);
 			for (Class<?> nextClass : getNextClasses(bd)) {
-				int n = indegree.get(nextClass);
+				if (!indegree.containsKey(nextClass)) {
+					continue;
+				}
 
+				int n = indegree.get(nextClass);
 				if (n == 1) {
 					queue.add(nextClass);
 					indegree.remove(nextClass);
@@ -88,32 +94,38 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 		}
 	}
 
-	private void checkValidation() {
+	/**
+	 * 스프링 기준으로 @Primary 유효성 체크
+	 * - 예를들어,
+	 * - A 인터페이스를 의존하는 B 클래스가 존재하고
+	 * - A 인터페이스를 구현한 C, D 클래스가 빈으로 등록되는 경우 throw NoUniqueBeanDefinitionException
+	 * - A 인터페이스를 의존하는 B 클래스가 없다면 C, D 클래스가 빈으로 등록되는 것은 정상적.
+	 */
+	private void checkPrimaryValidation() {
 		for (Map.Entry<Class<?>, List<BeanDefinition>> entry : beanDefinitionMap.entrySet()) {
-			if (dependsOnMe.containsKey(entry.getKey())
-					&& !dependsOnMe.get(entry.getKey()).isEmpty() // entry.getKey()에 의존하는 클래스가 존재할 때
-					&& entry.getValue().size() > 1 // 후보 빈이 2개 이상일 경우
-			) {
-				int count = 0; // @Primary 가 적용된 클래스 수
-				for (BeanDefinition bd : entry.getValue()) {
-					if (bd.getBeanType().isAnnotationPresent(Primary.class)) {
-						count++;
+			List<Class<?>> dom = dependsOnMe.get(entry.getKey());
+			if (dom == null || dom.isEmpty()) { // key에 해당하는 클래스를 의존하는 클래스가 없는 경우
+				continue;
+			}
 
-						if (count > 1) {
-							break;
-						}
-					}
+			int count = 0; // @Primary 가 적용된 클래스 개수
+			List<Class<?>> annotatedClasses = new ArrayList<>();
+			for (BeanDefinition bd : entry.getValue()) {
+				if (bd.isPrimary()) {
+					count++;
+					annotatedClasses.add(bd.getBeanType());
+				}
+			}
+
+			if (count > 1) {
+				StringBuilder message = new StringBuilder();
+				message.append(entry.getKey().getName()).append(" 타입에 @Primary가 적용된 클래스가 2개 이상입니다.\n");
+
+				for (Class<?> annotatedClass : annotatedClasses) {
+					message.append("\t- ").append(annotatedClass.getName()).append("\n");
 				}
 
-				if (count != 1) {
-					String message = "[" + dependsOnMe.get(entry.getKey()).getFirst().getName() +
-							"]의 파라미터 [" + entry.getKey().getName() + "] 타입";
-					message += count == 0 ?
-							"의 후보 빈이 2개 이상입니다."
-							: "에 @Primary가 적용된 클래스가 2개 이상입니다.";
-
-					throw new NoUniqueBeanDefinitionException(message);
-				}
+				throw new NoUniqueBeanDefinitionException(message.toString());
 			}
 		}
 	}
@@ -130,17 +142,12 @@ public class BeanInitializerUsingTopologicalSorting implements BeanInitializer {
 
 	private Class<?>[] getNextClasses(BeanDefinition bd) {
 		Set<Class<?>> next = new HashSet<>(dependsOnMe.get(bd.getBeanType()));
-
-		boolean isPrimary = bd.getBeanType().isAnnotationPresent(Primary.class);
 		for (Class<?> interfaceType : bd.getInterfaceTypes()) {
-			if (isPrimary
-					|| (beanDefinitionMap.containsKey(interfaceType) && beanDefinitionMap.get(interfaceType).size() == 1)
-			) {
-				if (dependsOnMe.containsKey(interfaceType)) {
-					next.addAll(dependsOnMe.get(interfaceType));
-				}
+			if (dependsOnMe.containsKey(interfaceType)) {
+				next.addAll(dependsOnMe.get(interfaceType));
 			}
 		}
+
 		return next.toArray(new Class<?>[0]);
 	}
 }

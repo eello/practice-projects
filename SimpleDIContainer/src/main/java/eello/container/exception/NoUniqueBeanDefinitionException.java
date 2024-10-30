@@ -1,4 +1,4 @@
-package main.java.eello.core;
+package main.java.eello.container.exception;
 
 public class NoUniqueBeanDefinitionException extends RuntimeException {
 

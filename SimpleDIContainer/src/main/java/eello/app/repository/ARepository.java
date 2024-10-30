@@ -1,6 +1,6 @@
-package main.java.eello.container.repository;
+package main.java.eello.app.repository;
 
-import main.java.eello.core.Component;
+import main.java.eello.container.annotation.Component;
 
 @Component
 public class ARepository implements Repository {

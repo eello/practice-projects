@@ -1,8 +1,7 @@
-package main.java.eello.container.service;
+package main.java.eello.app.service;
 
-import main.java.eello.container.repository.Repository;
-import main.java.eello.core.Component;
-import main.java.eello.core.Primary;
+import main.java.eello.app.repository.Repository;
+import main.java.eello.container.annotation.Component;
 
 //@Primary
 @Component

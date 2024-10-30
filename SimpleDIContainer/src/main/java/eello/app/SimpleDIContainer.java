@@ -1,14 +1,13 @@
-package main.java.eello.container;
+package main.java.eello.app;
 
 import java.lang.reflect.InvocationTargetException;
 
-import main.java.eello.container.contoller.AController;
-import main.java.eello.container.repository.ARepository;
-import main.java.eello.container.repository.BRepository;
-import main.java.eello.container.service.AService;
-import main.java.eello.container.service.BService;
-import main.java.eello.core.Application;
-import main.java.eello.core.BeanFactory;
+import main.java.eello.app.contoller.AController;
+import main.java.eello.app.repository.ARepository;
+import main.java.eello.app.service.AService;
+import main.java.eello.app.service.BService;
+import main.java.eello.container.Application;
+import main.java.eello.container.core.BeanFactory;
 
 public class SimpleDIContainer {
 

@@ -1,7 +1,7 @@
-package main.java.eello.container.contoller;
+package main.java.eello.app.contoller;
 
-import main.java.eello.container.service.Service;
-import main.java.eello.core.Component;
+import main.java.eello.app.service.Service;
+import main.java.eello.container.annotation.Component;
 
 @Component
 public class AController {

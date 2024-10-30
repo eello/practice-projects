@@ -1,4 +1,7 @@
-package main.java.eello.core;
+package main.java.eello.container;
+
+import main.java.eello.container.core.*;
+import main.java.eello.container.core.registry.DefaultSingletonRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -21,7 +24,7 @@ public class Application {
 		InvocationTargetException,
 		InstantiationException,
 		IllegalAccessException {
-		beanFactory = new DefaultBeanFactory();
+		beanFactory = new DefaultBeanFactory(new DefaultSingletonRegistry());
 		classPathBeanDefinitionScanner = new ClassPathBeanDefinitionScanner();
 		beanInitializer = new BeanInitializerUsingTopologicalSorting(beanFactory, classPathBeanDefinitionScanner);
 		beanInitializer.initialize(basePackage);

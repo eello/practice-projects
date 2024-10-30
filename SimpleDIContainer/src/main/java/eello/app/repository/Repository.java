@@ -1,4 +1,4 @@
-package main.java.eello.container.repository;
+package main.java.eello.app.repository;
 
 public interface Repository {
 

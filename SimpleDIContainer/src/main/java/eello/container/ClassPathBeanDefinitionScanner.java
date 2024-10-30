@@ -1,4 +1,8 @@
-package main.java.eello.core;
+package main.java.eello.container;
+
+import main.java.eello.container.annotation.Component;
+import main.java.eello.container.core.BeanDefinition;
+import main.java.eello.container.core.DefaultBeanDefinition;
 
 import java.io.File;
 import java.net.URL;
