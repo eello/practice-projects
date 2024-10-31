@@ -43,8 +43,12 @@
   - **interfaces** : 빈이 구현하고 있는 인터페이스 목록
   - **dependsOn** : 해당 빈을 생성하기 위해 필요한, 즉 생성자의 파라미터 타입 목록
   - **scope** : 빈의 스코프로 SINGLETON만 지원합니다.
+  - **\+ constructor** : 빈 인스턴스를 생성할 수 있는 생성자
+  - **\+ primary** : `@Primary` 적용 여부
 
-주요 메서드로 `newInstance(Object[] params)`가 있습니다. 이 메서드는 생성자에 필요한 파라미터 배열을 받아 이를 사용해 실제 빈의 인스턴스를 생성하는 메서드 입니다. 인스턴스를 생성하기 위해 `Refelction`의 기능을 사용합니다.
+~~주요 메서드로 `newInstance(Object[] params)`가 있습니다. 이 메서드는 생성자에 필요한 파라미터 배열을 받아 이를 사용해 실제 빈의 인스턴스를 생성하는 메서드 입니다. 인스턴스를 생성하기 위해 `Refelction`의 기능을 사용합니다.~~
+
+더이상 `BeanDefinition`에서 빈 인스턴스를 생성해 반환하지 않습니다. 대신 `constructor`를 반환해 `BeanFactory`에서 `BeanDefinition`으로 부터 얻은 생성자를 사용해 인스턴스를 생성합니다.
 
 ---
 
@@ -60,7 +64,8 @@
 ---
 
 ### BeanFactory
-실제로 빈 인스턴스를 생성하고 등록하는 클래스입니다. 구현체는 `DefaultBeanFactory`입니다. 동일한 이름의 빈이 등록되지 않았다면 등록되려는 빈이 의존하고 있는 타입의 등록되어있는 빈을 사용해 생성에 필요한 파라미터 배열을 만들어 빈을 생성합니다.
+실제로 빈 인스턴스를 생성하고 ~~등록하는~~ 클래스입니다. 구현체는 `DefaultBeanFactory`입니다. 동일한 이름의 빈이 등록되지 않았다면 등록되려는 빈이 의존하고 있는 타입의 등록되어있는 빈을 사용해 생성에 필요한 파라미터 배열을 만들어 빈을 생성합니다.
+> `BeanFactory`는 빈 인스턴스를 생성하고 등록은 `SingletonBeanRegistry`에 합니다.
 
 이때, `@Primary`를 추가해 파라미터 타입에 등록된 빈이 2개 이상인 경우 `@Primary`가 적용된 클래스를 찾아 주입하게 됩니다.
 
@@ -70,6 +75,10 @@
 - **beansByType** : 빈의 타입 - 타입이 동일한 인스턴스들
 
 beansByType에는 빈의 타입뿐만 아니라 구현하고 있는 인터페이스 타입에도 빈 인스턴스가 동일하게 포함됩니다. 이렇게 등록된 빈들은 구현된 `getBean()` 메서드를 통해 가져올 수 있습니다.
+
+### SingletonBeanRegistry
+기존에 빈 인스턴스를 관리하던 `BeanFactory`의 책임을 나누기 위해 만든 클래스입니다. `SingletonBeanRegistry`는 `BeanFactory`에서 생성한 싱글톤 빈을 등록하고 관리합니다. 구현 클래스는 `DefaultSingletonBeanRegistry`입니다.
+
 
 
 ## 결과
