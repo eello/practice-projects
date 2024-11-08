@@ -1,21 +1,21 @@
 package eello.notificationgeneration.dto.response;
 
-import eello.notificationgeneration.entity.Notification;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class NotificationGenerationResponseDTO extends NotificationResponseDTO {
+public class NotificationGenerationResponseDTO {
 
-    private Boolean created;
+    private boolean accept;
+    private Long requestId;
 
-    private NotificationGenerationResponseDTO(Notification notification) {
-        super(notification);
-        this.created = notification.getId() != null;
+    public NotificationGenerationResponseDTO(boolean accept, Long requestId) {
+        this.accept = accept;
+        this.requestId = requestId;
     }
 
-    public static NotificationGenerationResponseDTO from(Notification notification) {
-        return new NotificationGenerationResponseDTO(notification);
+    public static NotificationGenerationResponseDTO of(Long requestId) {
+        return new NotificationGenerationResponseDTO(true, requestId);
     }
 }

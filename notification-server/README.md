@@ -8,6 +8,9 @@
 - SpringBoot 3.3.5
 - MySQL 8.0
 - H2 Database
+- Docker Images
+  - RabbitMQ 3
+  - Redis 7.4
 
 ### 1단계
 
@@ -22,6 +25,10 @@
 ### 3단계
 
 - [ ] 알림 생성에 비동기 적용
+  - [x] rabbitmq 적용
+  - [x] 메시지 발행 전 redis에 요청 정보 저장
+  - [ ] 테스트 코드
+  - [ ] 예외 발생 상황
 
 ### 4단계
 

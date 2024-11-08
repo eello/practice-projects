@@ -4,24 +4,25 @@ import eello.notificationgeneration.dto.request.NotificationGenerationRequestDTO
 import eello.notificationgeneration.dto.response.NotificationGenerationResponseDTO;
 import eello.notificationgeneration.service.NotificationGenerationService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("noti")
-@RequiredArgsConstructor
 @Slf4j
 public class NotificationController {
 
-    private final NotificationGenerationService notificationGenerationService;
+    private final NotificationGenerationService generationService;
+
+    public NotificationController(NotificationGenerationService generationService) {
+        this.generationService = generationService;
+    }
 
     @PostMapping
-    public NotificationGenerationResponseDTO createNotification(@Valid @RequestBody NotificationGenerationRequestDTO dto) {
-        log.info("Creating notification: {}", dto);
-        return notificationGenerationService.create(dto);
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public NotificationGenerationResponseDTO generate(@Valid @RequestBody NotificationGenerationRequestDTO dto) {
+        return generationService.generate(dto);
     }
 }

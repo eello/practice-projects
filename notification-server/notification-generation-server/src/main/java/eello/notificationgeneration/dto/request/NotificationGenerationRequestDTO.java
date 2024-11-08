@@ -1,6 +1,7 @@
 package eello.notificationgeneration.dto.request;
 
 import eello.notificationgeneration.entity.Notification;
+import eello.notificationgeneration.entity.RequestInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -31,12 +32,12 @@ public class NotificationGenerationRequestDTO {
     @NotNull
     private LocalDateTime requestAt;
 
-    public Notification toEntity() {
-        return Notification.builder()
+    public RequestInfo toRequestInfo() {
+        return RequestInfo.builder()
                 .userId(userId)
                 .title(title)
                 .body(body)
-                .requestAt(requestAt)
+                .requestAt(LocalDateTime.now())
                 .build();
     }
 }
