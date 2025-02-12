@@ -18,4 +18,8 @@ public class VerificationCode {
         this.id = id;
         this.code = code;
     }
+
+    public boolean verify(String code) {
+        return this.code.equals(code);
+    }
 }

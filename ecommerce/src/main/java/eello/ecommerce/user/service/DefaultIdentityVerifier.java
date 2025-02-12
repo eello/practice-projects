@@ -1,5 +1,6 @@
 package eello.ecommerce.user.service;
 
+import eello.ecommerce.user.dto.request.VerificationCodeVerifyMailReqDTO;
 import eello.ecommerce.user.entity.VerificationCode;
 import eello.ecommerce.user.repository.VerificationCodeRedisRepository;
 import jakarta.mail.MessagingException;
@@ -24,5 +25,12 @@ public class DefaultIdentityVerifier implements IdentityVerifier {
 
         // 인증코드 전송
         vcSender.send(vc);
+    }
+
+    @Override
+    public boolean verify(VerificationCodeVerifyMailReqDTO dto) {
+        return vcRepository.findById(dto.getReceiveAddress())
+                .map(verificationCode -> verificationCode.verify(dto.getIvc()))
+                .orElse(false);
     }
 }
