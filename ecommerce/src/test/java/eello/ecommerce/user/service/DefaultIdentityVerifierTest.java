@@ -2,7 +2,9 @@ package eello.ecommerce.user.service;
 
 import eello.ecommerce.user.dto.request.VerificationCodeVerifyMailReqDTO;
 import eello.ecommerce.user.entity.VerificationCode;
+import eello.ecommerce.user.entity.VerifiedUser;
 import eello.ecommerce.user.repository.VerificationCodeRedisRepository;
+import eello.ecommerce.user.repository.VerifiedUserRedisRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,9 @@ class DefaultIdentityVerifierTest {
 
     @Mock
     private VerificationCodeSender vcSender;
+
+    @Mock
+    private VerifiedUserRedisRepository vuRepository;
 
     @InjectMocks
     private DefaultIdentityVerifier verifier;
@@ -78,5 +83,6 @@ class DefaultIdentityVerifierTest {
 
         //then
         assertThat(result).isTrue();
+        verify(vuRepository, times(1)).save(any(VerifiedUser.class));
     }
 }

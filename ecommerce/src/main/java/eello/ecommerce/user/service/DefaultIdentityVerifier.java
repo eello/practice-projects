@@ -2,7 +2,9 @@ package eello.ecommerce.user.service;
 
 import eello.ecommerce.user.dto.request.VerificationCodeVerifyMailReqDTO;
 import eello.ecommerce.user.entity.VerificationCode;
+import eello.ecommerce.user.entity.VerifiedUser;
 import eello.ecommerce.user.repository.VerificationCodeRedisRepository;
+import eello.ecommerce.user.repository.VerifiedUserRedisRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ public class DefaultIdentityVerifier implements IdentityVerifier {
     private final VerificationCodeGenerator vcGenerator;
     private final VerificationCodeRedisRepository vcRepository;
     private final VerificationCodeSender vcSender;
+    private final VerifiedUserRedisRepository vuRepository;
 
     @Override
     public void sendVerificationCodeTo(String target) throws MessagingException {
@@ -29,8 +32,16 @@ public class DefaultIdentityVerifier implements IdentityVerifier {
 
     @Override
     public boolean verify(VerificationCodeVerifyMailReqDTO dto) {
-        return vcRepository.findById(dto.getReceiveAddress())
+        Boolean result = vcRepository.findById(dto.getReceiveAddress())
                 .map(verificationCode -> verificationCode.verify(dto.getIvc()))
                 .orElse(false);
+
+        if (!result) {
+            return false;
+        }
+
+        // 인증된 유저 저장
+        vuRepository.save(new VerifiedUser(dto.getReceiveAddress()));
+        return true;
     }
 }
