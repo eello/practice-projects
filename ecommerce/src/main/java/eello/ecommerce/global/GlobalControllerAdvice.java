@@ -1,5 +1,6 @@
 package eello.ecommerce.global;
 
+import eello.ecommerce.global.exception.CustomException;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,6 +25,14 @@ public class GlobalControllerAdvice {
         response.put("invalidFields", invalidFields);
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<?> handleCustomException(CustomException ex) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+
+        return ResponseEntity.status(ex.getHttpStatus()).body(response);
     }
 
     @Getter
