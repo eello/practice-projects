@@ -1,8 +1,9 @@
 package eello.ecommerce.user.controller;
 
-import eello.ecommerce.user.dto.request.SignupReqDTO;
-import eello.ecommerce.user.dto.request.VerificationCodeMailReqDTO;
-import eello.ecommerce.user.dto.request.VerificationCodeVerifyMailReqDTO;
+import eello.ecommerce.user.dto.request.*;
+import eello.ecommerce.user.dto.response.DuplicationCheckResDTO;
+import eello.ecommerce.user.entity.User;
+import eello.ecommerce.user.repository.UserRepository;
 import eello.ecommerce.user.service.IdentityVerifier;
 import eello.ecommerce.user.service.UserService;
 import jakarta.mail.MessagingException;
@@ -24,6 +25,7 @@ public class UserController {
 
     private final IdentityVerifier iv;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/ivc")
     public void getIVC(@Valid @RequestBody VerificationCodeMailReqDTO vcReq) throws MessagingException {
@@ -46,5 +48,36 @@ public class UserController {
     public ResponseEntity<?> signup(@Valid @RequestBody SignupReqDTO dto) {
         userService.register(dto);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/check-email")
+    public ResponseEntity<DuplicationCheckResDTO> checkEmail(@Valid @RequestBody EmailCheckReqDTO dto) {
+        DuplicationCheckResDTO response;
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            response = new DuplicationCheckResDTO(false, "이미 가입된 이메일 주소입니다.");
+        } else {
+            response = new DuplicationCheckResDTO(true);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/check-phone")
+    public ResponseEntity<DuplicationCheckResDTO> checkPhone(@Valid @RequestBody PhoneCheckReqDTO dto) {
+        DuplicationCheckResDTO response;
+
+        User user;
+        if ((user = userRepository.findByPhone(dto.getPhone())) == null) {
+            response = new DuplicationCheckResDTO(true);
+        } else {
+            String[] joinedEmail = user.getEmail().split("@", 2);
+            String obfuscate = joinedEmail[0].substring(0, 2) + "*".repeat(joinedEmail[0].length() - 2);
+            String maskedEmail = obfuscate + "@" + joinedEmail[1];
+            response = new DuplicationCheckResDTO(
+                    false,
+                    maskedEmail + " 이메일로 가입된 휴대폰 번호입니다.");
+        }
+
+        return ResponseEntity.ok(response);
     }
 }
