@@ -5,6 +5,9 @@ import eello.ecommerce.global.exception.CustomException;
 import eello.ecommerce.global.exception.ErrorCode;
 import eello.ecommerce.user.dto.request.SignupReqDTO;
 import eello.ecommerce.user.entity.User;
+import eello.ecommerce.user.entity.embeddable.Email;
+import eello.ecommerce.user.entity.embeddable.Password;
+import eello.ecommerce.user.entity.embeddable.Phone;
 import eello.ecommerce.user.repository.UserRepository;
 import eello.ecommerce.user.repository.VerifiedUserRedisRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +49,9 @@ class DefaultUserServiceTest {
         argon2Properties = new Argon2Properties();
         argon2Properties.setSaltLength(16);
         argon2Properties.setHashLength(32);
-        argon2Properties.setMemory(25600);
-        argon2Properties.setIterations(5);
-        argon2Properties.setParallelism(2);
+        argon2Properties.setMemory(12800);
+        argon2Properties.setIterations(1);
+        argon2Properties.setParallelism(1);
 
         passwordEncoder = new Argon2PasswordEncoder(
                 argon2Properties.getSaltLength(),
@@ -122,10 +125,9 @@ class DefaultUserServiceTest {
         User user = User.builder()
                 .id(1L)
                 .name(dto.getName())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .passwordHash(passwordEncoder.encode(dto.getPwd()))
-                .argon2Properties(argon2Properties)
+                .email(new Email(dto.getEmail()))
+                .phone(new Phone(dto.getPhone()))
+                .password(new Password(dto.getPwd(), passwordEncoder))
                 .termsAgreement(dto.getTermsAgreement())
                 .build();
 

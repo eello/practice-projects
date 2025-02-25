@@ -4,6 +4,9 @@ import eello.ecommerce.global.config.argon2.Argon2Properties;
 import eello.ecommerce.global.exception.CustomException;
 import eello.ecommerce.global.exception.ErrorCode;
 import eello.ecommerce.user.dto.request.SignupReqDTO;
+import eello.ecommerce.user.entity.embeddable.Email;
+import eello.ecommerce.user.entity.embeddable.Password;
+import eello.ecommerce.user.entity.embeddable.Phone;
 import eello.ecommerce.user.entity.User;
 import eello.ecommerce.user.repository.UserRepository;
 import eello.ecommerce.user.repository.VerifiedUserRedisRepository;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -56,10 +61,9 @@ public class DefaultUserService implements UserService {
 
         User user = User.builder()
                 .name(dto.getName())
-                .email(dto.getEmail())
-                .phone(dto.getPhone()) // dto.getPhone() -> 01012345678 형식으로 리턴되어 저장됨
-                .passwordHash(passwordEncoder.encode(dto.getPwd()))
-                .argon2Properties(argon2Properties)
+                .email(new Email(dto.getEmail()))
+                .phone(new Phone(dto.getPhone()))
+                .password(new Password(dto.getPhone(), passwordEncoder))
                 .termsAgreement(dto.getTermsAgreement())
                 .build();
 

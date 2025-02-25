@@ -2,7 +2,6 @@ package eello.ecommerce.user.controller;
 
 import eello.ecommerce.user.dto.request.*;
 import eello.ecommerce.user.dto.response.DuplicationCheckResDTO;
-import eello.ecommerce.user.entity.User;
 import eello.ecommerce.user.repository.UserRepository;
 import eello.ecommerce.user.service.IdentityVerifier;
 import eello.ecommerce.user.service.UserService;
@@ -64,19 +63,11 @@ public class UserController {
 
     @PostMapping("/check-phone")
     public ResponseEntity<DuplicationCheckResDTO> checkPhone(@Valid @RequestBody PhoneCheckReqDTO dto) {
-        DuplicationCheckResDTO response;
-
-        User user;
-        if ((user = userRepository.findByPhone(dto.getPhone())) == null) {
-            response = new DuplicationCheckResDTO(true);
-        } else {
-            String[] joinedEmail = user.getEmail().split("@", 2);
-            String obfuscate = joinedEmail[0].substring(0, 2) + "*".repeat(joinedEmail[0].length() - 2);
-            String maskedEmail = obfuscate + "@" + joinedEmail[1];
-            response = new DuplicationCheckResDTO(
-                    false,
-                    maskedEmail + " 이메일로 가입된 휴대폰 번호입니다.");
-        }
+        DuplicationCheckResDTO response = userRepository.findByPhone(dto.getPhone())
+                .map(user -> new DuplicationCheckResDTO(
+                        false,
+                        user.getEmail().getMaskedEmail() + " 이메일로 가입된 휴대폰 번호입니다.")
+                ).orElseGet(() -> new DuplicationCheckResDTO(true));
 
         return ResponseEntity.ok(response);
     }
